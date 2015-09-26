@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<colorTheme id="999" name="!_Oblivion_v2_MOD" modified="2014-07-07 00:00:00" author="sousky">
+    <searchResultIndication color="#D8D8D8" />
+    <filteredSearchResultIndication color="#D8D8D8" />
+    <occurrenceIndication color="#515100" />
+    <writeOccurrenceIndication color="#515100" />
+    <singleLineComment color="#2CB22C" />
+    <multiLineComment color="#2CB22C" />
+    <commentTaskTag color="#2CB22C" />
+    <javadoc color="#00E070" />
+    <javadocLink color="#00E070" />
+    <javadocTag color="#00E070" />
+    <javadocKeyword color="#00E070" />
+    <class color="#FF6600" bold="false" italic="false" underline="false" strikethrough="false" />
+    <bracket color="#FFFFFF" />
+    <number color="#FFF200" />
+    <string color="#BB5500" />
+    <operator color="#D8D8D8" />
+    <keyword color="#FF0000" />
+    <annotation color="#FFF4AD" />
+    <interface color="#FF69B4" />
+    <method color="#be8cff" />
+    <methodDeclaration color="#be8cff" bold="true" />
+    <staticMethod color="#be8cff" underline="true" />
+    <inheritedMethod color="#be8cff" italic="true" />
+    <abstractMethod color="#be8cff" />
+    <localVariable color="#00B0EE" />
+    <localVariableDeclaration color="#00B0EE" bold="true" />
+    <parameterVariable color="#00B0EE" />
+    <field color="#00FFFF" />
+    <staticField color="#00CCCC" underline="true" />
+    <staticFinalField color="#00CCCC" italic="true" underline="true" />
+    <deprecatedMember color="#FFFFFF" strikethrough="true" />
+    <background color="#1A1A1A" />
+    <currentLine color="#000000" />
+    <foreground color="#D8D8D8" />
+    <lineNumber color="#959595" />
+    <selectionBackground color="#757575" />
+    <selectionForeground color="#D0D0D0" />
+    <constant color="#3D9AD6" italic="false" underline="false" strikethrough="false" />
+    <deletionIndication color="#D25252" italic="false" underline="false" strikethrough="false" />
+    <enum color="#7FB347" italic="false" underline="false" strikethrough="false" />
+    <findScope color="#DDF0FF" />
+    <sourceHoverBackground color="#000000" />
+    <typeArgument color="#4B9CE9" italic="false" underline="false" strikethrough="false" />
+    <typeParameter color="#4B9CE9" italic="false" underline="false" strikethrough="false" />
+</colorTheme>
