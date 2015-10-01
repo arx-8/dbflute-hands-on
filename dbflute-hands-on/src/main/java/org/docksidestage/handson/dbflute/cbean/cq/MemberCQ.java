@@ -33,4 +33,23 @@ public class MemberCQ extends BsMemberCQ {
     //                                                                       Arrange Query
     //                                                                       =============
     // You can make your arranged query methods here. e.g. public void arrangeXxx()
+    /**
+     * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br>
+     * MEMBER_NAME: {IX, NotNull, VARCHAR(160)} <br>
+     * <pre>e.g. setMemberName_LikeSearch("xxx", op <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> op.<span style="color: #CC4747">likeContain()</span>);</pre>
+     * @param memberNamePrefix The value of memberName as likeSearch. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setMemberName_LikePrefix(String memberNamePrefix) {
+        setMemberName_LikeSearch(memberNamePrefix, xcLSOP(op -> op.likePrefix()));
+    }
+
+    /**
+     * LikeSearch with various options. (versatile) {like '%xxx%' escape ...}. And NullOrEmptyIgnored, SeveralRegistered. <br>
+     * MEMBER_NAME: {IX, NotNull, VARCHAR(160)} <br>
+     * <pre>e.g. setMemberName_LikeSearch("xxx", op <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> op.<span style="color: #CC4747">likeContain()</span>);</pre>
+     * @param memberNameContain The value of memberName as likeSearch. (NullAllowed: if null (or empty), no condition)
+     */
+    public void setMemberName_LikeContain(String memberNameContain) {
+        setMemberName_LikeSearch(memberNameContain, xcLSOP(op -> op.likeContain()));
+    }
 }
