@@ -52,4 +52,15 @@ public class MemberCQ extends BsMemberCQ {
     public void setMemberName_LikeContain(String memberNameContain) {
         setMemberName_LikeSearch(memberNameContain, xcLSOP(op -> op.likeContain()));
     }
+
+    /**
+     * 銀行振込で購入を支払ったことのある会員を検索する。
+     */
+    public void arrangeExistsBankTransferPayment() {
+        existsPurchase(purchaseCB -> {
+            purchaseCB.query().existsPurchasePayment(purchasePaymentCB -> {
+                purchasePaymentCB.query().setPaymentMethodCode_Equal_BankTransfer();
+            });
+        });
+    }
 }

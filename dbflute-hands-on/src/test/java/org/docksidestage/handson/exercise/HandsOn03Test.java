@@ -571,7 +571,7 @@ public class HandsOn03Test extends UnitContainerTestCase {
         Member member = new Member();
         member.setMemberName("境界太郎");
         member.setMemberAccount("BorderTarou");
-        member.setMemberStatusCode("FML");
+        member.setMemberStatusCode_正式会員();
         member.setFormalizedDatetime(new HandyDate("2015-09-28").getLocalDateTime());
         member.setBirthdate(new HandyDate("1974-1-1").moveToYearTerminal().getLocalDate());
         member.setRegisterDatetime(new HandyDate("2015-09-28").getLocalDateTime());
