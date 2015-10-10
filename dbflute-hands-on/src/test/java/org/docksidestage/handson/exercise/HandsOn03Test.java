@@ -2,11 +2,14 @@ package org.docksidestage.handson.exercise;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -19,7 +22,6 @@ import org.docksidestage.handson.dbflute.exbhv.PurchaseBhv;
 import org.docksidestage.handson.dbflute.exentity.Member;
 import org.docksidestage.handson.dbflute.exentity.MemberSecurity;
 import org.docksidestage.handson.dbflute.exentity.MemberStatus;
-import org.docksidestage.handson.dbflute.exentity.MemberWithdrawal;
 import org.docksidestage.handson.dbflute.exentity.ProductCategory;
 import org.docksidestage.handson.dbflute.exentity.Purchase;
 import org.docksidestage.handson.unit.UnitContainerTestCase;
@@ -72,7 +74,9 @@ public class HandsOn03Test extends UnitContainerTestCase {
         memberList.forEach(m -> {
             log(m.getMemberId(), m.getMemberName(), m.getBirthdate(), m.getMemberStatus());
 
+            assertTrue(m.getBirthdate().isBefore(birthdateTo.getLocalDate()) || m.getBirthdate().isEqual(birthdateTo.getLocalDate()));
             assertTrue(birthdateTo.isGreaterEqual(m.getBirthdate()));
+
         });
     }
 
@@ -126,13 +130,29 @@ public class HandsOn03Test extends UnitContainerTestCase {
         memberList.forEach(m -> log(m.getMemberId(), m.getMemberSecurityAsOne()));
 
         // リマインダ質問のアサートをするために、MemberIdで会員セキュリティ情報を検索
-        List<Integer> memberIdList = new ArrayList<>();
-        memberList.forEach(m -> memberIdList.add(m.getMemberId()));
-        assertHasAnyElement(memberIdList);
-
         // ラムダさんパネーっす
-        memberSecurityBhv.selectList(cb -> cb.query().setMemberId_InScope(memberIdList))
+        memberSecurityBhv.selectList(cb -> cb.query().setMemberId_InScope(memberBhv.extractMemberIdList(memberList)))
                 .forEach(ms -> assertTrue(ms.getReminderQuestion().contains(reminderQuestionContain)));
+
+        // [別解トライ] ラムダさんパネーっす ver.2
+        // stream()でList生成（returnも省略できちゃう）
+        // List<Integer> memberIdList = memberList.stream().map(m -> {
+        //     return m.getMemberId();
+        // }).collect(Collectors.toList());
+        List<Integer> memberIdList = memberList.stream().map(m -> m.getMemberId()).collect(Collectors.toList());
+
+        // stream()でMap生成
+        Map<Integer, MemberSecurity> securityMap = memberSecurityBhv.selectList(cb -> {
+            cb.query().setMemberId_InScope(memberIdList);
+        }).stream().collect(Collectors.toMap(ms -> ms.getMemberId(), ms -> ms));
+
+        // assert
+        memberList.forEach(m -> {
+            MemberSecurity ms = securityMap.get(m.getMemberId());
+            log(m.getMemberId(), ms.getReminderQuestion());
+
+            assertTrue(ms.getReminderQuestion().contains(reminderQuestionContain));
+        });
     }
 
     /**
@@ -154,9 +174,7 @@ public class HandsOn03Test extends UnitContainerTestCase {
 
         // ## Assert ##
         assertHasAnyElement(memberList);
-        memberList.forEach(m -> {
-            assertFalse(m.getMemberStatus().isPresent());
-        });
+        memberList.forEach(m -> assertFalse(m.getMemberStatus().isPresent()));
 
         // 会員が会員ステータスごとに固まって並んでいることをアサート
         // 方針：
@@ -167,12 +185,12 @@ public class HandsOn03Test extends UnitContainerTestCase {
         LinkedList<String> foundCodeList = new LinkedList<>();
         foundCodeList.add(memberList.get(0).getMemberStatusCode());
 
-        // fail()の動作確認用
+        // fail()の動作確認用（試しに末尾に出現するコードを先頭に入れておく）
         // foundCodeList.addFirst("PRV");
 
         for (Member m : memberList) {
             String statusCode = m.getMemberStatusCode();
-            log(m.getMemberId(), m.getMemberStatusCode());
+            log(m.getMemberId(), statusCode);
 
             if (!foundCodeList.getLast().equals(statusCode)) {
                 if (foundCodeList.contains(statusCode)) {
@@ -181,6 +199,27 @@ public class HandsOn03Test extends UnitContainerTestCase {
                     foundCodeList.addLast(statusCode);
                 }
             }
+        }
+
+        // [別解トライ] 既出コードはSetで一意にする。
+        // 方針：
+        // 既出コードは、Setに持たせる。
+        // 直前のレコードと異なるコードが出現したら、新規出現である（既出Setにない）ことを確認する。
+        Set<String> codeSet = new HashSet<>();
+        String prevCode = null;
+
+        // assertFalse()の動作確認用（試しに末尾に出現するコードを先に入れておく）
+        // codeSet.add("PRV");
+
+        for (Member m : memberList) {
+            String currentCode = m.getMemberStatusCode();
+            log(m.getMemberId(), "curentCode:" + currentCode, "prevCode:" + prevCode);
+
+            if (!currentCode.equals(prevCode)) {
+                assertFalse(currentCode + "：コードが既出。固まって並んでいない。", codeSet.contains(currentCode));
+            }
+            codeSet.add(currentCode);
+            prevCode = currentCode;
         }
     }
 
@@ -230,8 +269,8 @@ public class HandsOn03Test extends UnitContainerTestCase {
     public void test_6() throws Exception {
         // ## Arrange ##
         final String memberNameContain = "vi";
-        final LocalDateTime fromDateTime = new HandyDate("2005-10-1").getLocalDateTime();
-        final LocalDateTime toDatetime = new HandyDate("2005-10-3").getLocalDateTime();
+        final LocalDateTime fromDateTime = new HandyDate("2005-10-1").moveToDayJust().getLocalDateTime();
+        final LocalDateTime toDatetime = new HandyDate("2005-10-3").moveToDayTerminal().getLocalDateTime();
 
         // ※実装できたら、こんどはスーパークラスのメソッド adjustMember_FormalizedDatetime_...() を使って、10月1日ジャスト(時分秒なし)の正式会員日時を持つ会員データを作成してテスト実行してみましょう。 もともと一件しかなかった検索結果が「二件」になるはずです。
         adjustMember_FormalizedDatetime_FirstOnly(new HandyDate("2005-10-1").getLocalDateTime(), memberNameContain);
@@ -253,10 +292,16 @@ public class HandsOn03Test extends UnitContainerTestCase {
             MemberStatus memberStatus = m.getMemberStatus().get();
             log(m.getMemberId(), m.getFormalizedDatetime(), memberStatus.getMemberStatusName());
 
+            // 会員ステータスがコードと名称だけが取得されていることをアサート
             assertNotNull(memberStatus.getMemberStatusCode());
             assertNotNull(memberStatus.getMemberStatusName());
             assertException(NonSpecifiedColumnAccessException.class, () -> memberStatus.getDescription());
             assertException(NonSpecifiedColumnAccessException.class, () -> memberStatus.getDisplayOrder());
+
+            // 会員の正式会員日時が指定された条件の範囲内であることをアサート
+            LocalDateTime formalizedDt = m.getFormalizedDatetime();
+            assertTrue(fromDateTime.isBefore(formalizedDt) || fromDateTime.isEqual(formalizedDt));
+            assertTrue(toDatetime.isAfter(formalizedDt) || toDatetime.isEqual(formalizedDt));
         });
     }
 
@@ -338,10 +383,8 @@ public class HandsOn03Test extends UnitContainerTestCase {
             cb.setupSelect_MemberSecurityAsOne();
             cb.setupSelect_MemberWithdrawalAsOne();
 
-            cb.orScopeQuery(orCB -> {
-                orCB.query().setBirthdate_LessEqual(expectToBirthdate.getLocalDate());
-                orCB.query().setBirthdate_IsNull();
-            });
+            // orScopeQueryは不要
+            cb.query().setBirthdate_FromTo(null, expectToBirthdate.getLocalDate(), op -> op.compareAsYear().allowOneSide().orIsNull());
 
             cb.query().addOrderBy_Birthdate_Desc().withNullsFirst();
         });
@@ -351,12 +394,14 @@ public class HandsOn03Test extends UnitContainerTestCase {
         memberList.forEach(m -> {
             // nullpo防止に、MemberWithdrawalが存在しない場合は空のEntityを生成（Lamdaを上手く使ったスマートな書き方が思いつかない・・・）
             // orElseGet()の方がコスト安？必要となるまで引数Objを生成しないらしい。参考：http://qiita.com/shindooo/items/815d651a72f568112910
-            MemberWithdrawal mw = m.getMemberWithdrawalAsOne().orElseGet(() -> new MemberWithdrawal());
+            // MemberWithdrawal mw = m.getMemberWithdrawalAsOne().orElseGet(() -> new MemberWithdrawal());
+            // Stringだけ受け取った方がよりシンプル？
+            String reasonInputText = m.getMemberWithdrawalAsOne().map(mw -> mw.getWithdrawalReasonInputText()).orElse("(空っぽ)");
+
             MemberSecurity ms = m.getMemberSecurityAsOne().get();
             Optional<LocalDate> optBirthdate = Optional.ofNullable(m.getBirthdate());
 
-            log(m.getMemberId(), optBirthdate.orElse(null), ms.getReminderQuestion(), ms.getReminderAnswer(),
-                    mw.getWithdrawalReasonInputText());
+            log(m.getMemberId(), optBirthdate.orElse(null), ms.getReminderQuestion(), ms.getReminderAnswer(), reasonInputText);
 
             optBirthdate.ifPresent(b -> {
                 HandyDate birthdateHd = new HandyDate(b);
