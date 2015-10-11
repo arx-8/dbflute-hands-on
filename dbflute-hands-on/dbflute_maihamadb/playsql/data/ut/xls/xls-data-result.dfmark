@@ -8,7 +8,7 @@ data-directory: playsql/data/ut/xls
 
 [20-member.xls]
   MEMBER (20)
-  MEMBER_ADDRESS (20)
+  MEMBER_ADDRESS (22)
   MEMBER_LOGIN (56)
   MEMBER_SECURITY (20)
   MEMBER_SERVICE (20)
