@@ -94,7 +94,7 @@ map:{
             ; code = $sql:loc.PRODUCT_CATEGORY_CODE
             ; name = $sql:loc.PRODUCT_CATEGORY_NAME
             ; comment = $sql: 'of' || rel.PRODUCT_CATEGORY_NAME
-            ; orderBy = loc.PARENT_CATEGORY_CODE is not null, loc.PARENT_CATEGORY_CODE
+            ; orderBy = loc.PARENT_CATEGORY_CODE is not null, loc.PRODUCT_CATEGORY_CODE
         }
     }
     ; ProductStatus = list:{
