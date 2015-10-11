@@ -1,8 +1,6 @@
 /.settings
 /.project
-/.classpath
 /bin
 /target
 /dbflute_exampledb
 /mydbflute
-/pom.xml
